@@ -1,0 +1,104 @@
+const { SlashCommandBuilder, EmbedBuilder, GatewayIntentBits, VoiceChannel, GuildEmoji } = require("discord.js");
+const client = require("../../index");
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName("music")
+        .setDescription("Completa o sistema de música.")
+        .addSubcommand(subcommand =>
+            subcommand.setName("play")
+            .setDescription("Toca uma música.")
+            .addStringOption(option =>
+                option.setName("query")
+                .setDescription("Pesquise por nome ou link da música.")
+                .setRequired(true)
+                )
+        )
+        .addSubcommand(subcommand =>
+            subcommand.setName("options")
+            .setDescription("Selecione uma opção.")
+            .addStringOption(option =>
+                option.setName("options")
+                .setDescription("Selecione uma opção.")
+                .setRequired(true)
+                .addChoices(
+                    { name: "queue", value: "queue" },
+                    { name: "skip", value: "skip" },
+                    { name: "pause", value: "pause" },
+                    { name: "resume", value: "resume" },
+                    { name: "stop", value: "stop" },
+                )
+            )
+        ),
+        async execute(interaction) {
+            const {options, member, guild, channel} = interaction;
+
+            const subcommand = options.getSubcommand();
+            const query = options.getString("querry");
+            const volume = options.getNumber("percent");
+            const option = options.getString("options");
+            const voiceChannel = member.voice.channel;
+
+
+            const embed = new EmbedBuilder();
+
+            if (!voiceChannel) {
+                embed.setColor("Red").setDescription("Você precisa estar em um canal de voz para executar os comandos de música.");
+                return interaction.reply({ embeds: [embed], ephemeral: true });   
+            }
+
+            if (!member.voice.channelId == guild.members.me.voice.channelId) {
+                embed.setColor("Red").setDescription(`Você não pode usar o player de música agora, ele já está ativo em <#${guild.members.me.voice.channelId}.`);
+                return interaction.reply({ embeds: [embed], ephemeral: true });   
+            }
+
+            try {
+                switch (subcommand) {
+                    case "play":
+                        client.distube.play(voiceChannel, querry, { textChannel: channel, member: member });
+                        return interaction.reply({ content: "🎶 Request received." });
+                    case "volume":
+                        client.distube.setVolume(voiceChannel, volume);
+                        return interaction.reply({ content: `🔉 Volume foi para ${volume}%.` });
+                    case "settings":
+                        const queue = await client.distube.getQueue(voiceChannel);
+
+                        if(!queue) {
+                            embed.setColor("Red").setDescription("Não tem nenhuma playlist ativa.")
+                            return interaction.reply({ embeds: [embed], ephemeral: true });
+                        }
+
+                        switch(option) {
+                            case "skip":
+                                await queue.skip(voiceChannel);
+                                embed.setColor("Orange").setDescription("⏩ Pularo a música.");
+                                return interaction.reply({ embeds: [embed], ephemeral: false });
+                            case "stop":
+                                await queue.stop(voiceChannel);
+                                embed.setColor("Orange").setDescription("⏹ Pararo a música.");
+                                return interaction.reply({ embeds: [embed], ephemeral: false });
+                            case "pause":
+                                await queue.pause(voiceChannel);
+                                embed.setColor("Orange").setDescription("⏸ Pausaro a música.");
+                                return interaction.reply({ embeds: [embed], ephemeral: false });
+                            case "resumed":
+                                await queue.pause(voiceChannel);
+                                embed.setColor("Orange").setDescription("⏯ Voltaro a música.");
+                                return interaction.reply({ embeds: [embed], ephemeral: false });
+                            case "queue" :
+                                embed.setColor("Orange").setDescription(`${queue.songs.map(
+                                    (songs, id) => `\n**{id +1}.** ${song.name} -\`${song.formattedDuration}\``
+                                )}`);
+                                return interaction.reply({ embeds: [embed] });
+                        }
+                }
+
+            } catch(err) {
+                console.log(err);
+
+                embed.setColor("Red").setDescription("⛔ | Alguma coisa deu errado...");
+
+                return interaction.reply({ embeds: [embed] });
+            }
+        }
+}
