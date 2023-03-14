@@ -16,6 +16,6 @@ module.exports = {
       .setTimestamp()
       .setFooter({ text: interaction.user.username, iconURL: avatar });
 
-    interaction.reply({ embeds: [embed] });
+    interaction.reply({ embeds: [embed], ephemeral: true });
   },
 };
