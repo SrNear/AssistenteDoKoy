@@ -19,11 +19,11 @@ for (const file of commandFiles) {
 }
 
 // instância REST
+(async function updateGlobalCommands(clientId, token, commands) {
+    try {
 const rest = new REST({version: "10"}).setToken(TOKEN);
 
 // deploy
-(async () => {
-    try {
         console.log(`Resentando ${commands.length} comandos...`)
     
         // PUT
