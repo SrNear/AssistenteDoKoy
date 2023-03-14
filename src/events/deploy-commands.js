@@ -19,7 +19,7 @@ for (const file of commandFiles) {
 }
 
 // instância REST
-(async function updateGlobalCommands(CLIENT_ID, TOKEN, command) {
+(async function updateGlobalCommands(CLIENT_ID, TOKEN, commands) {
     try {
 const rest = new REST({version: "10"}).setToken(TOKEN);
 
