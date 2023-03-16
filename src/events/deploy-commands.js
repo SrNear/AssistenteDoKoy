@@ -28,7 +28,7 @@ const rest = new REST({version: "10"}).setToken(TOKEN);
     
         // PUT
         const data = await rest.put(
-            Routes.applicationCommands(CLIENT_ID),
+            Routes.applicationCommands(CLIENT_ID, GUILD_ID),
             {body: commands}
         )
             console.log("Comandos registrados com sucesso!")
