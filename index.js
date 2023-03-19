@@ -1,5 +1,6 @@
 const { Client, Events, GatewayIntentBits, Collection, ActivityType, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 const axios = require('axios');
+const { Configuration, OpenAIApi } = require('openai');
 
 // dotenv
 const dotenv = require('dotenv')
